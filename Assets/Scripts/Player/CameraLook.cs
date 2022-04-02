@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class CameraLook : MonoBehaviour
 {
+    public static Action<float> OnForwardChanged;
     //Properties
     //====================================================================================================================//
     
@@ -22,6 +23,7 @@ public class CameraLook : MonoBehaviour
 
     private Vector2 _lastMousePosition;
     private Vector2 _currentMousePosition;
+    [SerializeField]
     private Vector2 _mouseDelta;
 
     private bool _cursorLocked;
@@ -64,17 +66,20 @@ public class CameraLook : MonoBehaviour
     
     private void UpdateForwardFacingDirection()
     {
-        var yDeltaDegrees = _mouseDelta.x * xSpeed* Time.deltaTime;
+        var yDeltaDegrees = _mouseDelta.x * xSpeed;
 
         var currentRotation = transform.rotation;
         var rotation = Quaternion.Euler(0, yDeltaDegrees, 0);
 
         transform.rotation = currentRotation * rotation;
+        
+        if (Mathf.Abs(yDeltaDegrees) < 1f)
+            OnForwardChanged?.Invoke(yDeltaDegrees);
     }
     
     private void UpdateCameraPitch()
     {
-        var xDeltaDegrees = _mouseDelta.y * ySpeed * Time.deltaTime;
+        var xDeltaDegrees = _mouseDelta.y * ySpeed;
         
         var currentLocalRotation = cameraTransform.localRotation;
         var yQuaternion = Quaternion.AngleAxis(xDeltaDegrees, -Vector3.right);

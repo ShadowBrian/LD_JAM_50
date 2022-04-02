@@ -89,7 +89,7 @@ public class PlayerCarryInteract : MonoBehaviour
         _carryingInteractable = _lookingAtInteractable;
         _lookingAtInteractable = null;
 
-        _carryingInteractable.SetColliderActive(false);
+        _carryingInteractable.StartInteraction();
         
         var carryTransform = _carryingInteractable.transform;
         carryTransform.SetParent(transform, false);
@@ -98,8 +98,7 @@ public class PlayerCarryInteract : MonoBehaviour
 
     private void DropObject()
     {
-        _carryingInteractable.SetColliderActive(true);
-        _carryingInteractable.ResetParent();
+        _carryingInteractable.StopInteraction();
         
         _carryingInteractable = null;
     }

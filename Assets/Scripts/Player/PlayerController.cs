@@ -6,20 +6,20 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
+    public static Action<int, int> OnInputChanged;
     //Properties
     //====================================================================================================================//
+    public float CurrentMoveSpeed => moveSpeed * _inputState.y * SpeedMultiplier;
 
-    [SerializeField]
-    private float horizontalSpeed;
-    [SerializeField]
-    private float forwardSpeed;
+    public float SpeedMultiplier = 1f;
     
     [SerializeField]
-    private Transform cameraTransform;
-
+    private float moveSpeed;
+    
     //====================================================================================================================//
 
     private Vector2Int _inputState;
+    private Vector2Int _lastInputState;
     
     private Rigidbody rigidbody
     {
@@ -47,8 +47,8 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         var moveToApply = Vector3.zero;
-        moveToApply += transform.forward * _inputState.y * forwardSpeed;
-        moveToApply += transform.right * _inputState.x * horizontalSpeed;
+        moveToApply += transform.forward * _inputState.y * moveSpeed * SpeedMultiplier;
+        moveToApply += transform.right * _inputState.x * moveSpeed * SpeedMultiplier;
 
         rigidbody.position += moveToApply * Time.fixedDeltaTime;
     }
@@ -69,6 +69,12 @@ public class PlayerController : MonoBehaviour
             _inputState.y = -1;
         else
             _inputState.y = 0;
+
+        if (_lastInputState == _inputState)
+            return;
+
+        _lastInputState = _inputState;
+        OnInputChanged?.Invoke(_inputState.x, _inputState.y);
     }
 
     //====================================================================================================================//

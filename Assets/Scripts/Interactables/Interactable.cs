@@ -6,8 +6,10 @@ public class Interactable : MonoBehaviour
 {
     //Properties
     //====================================================================================================================//
-    
-    private Collider Collider{
+
+    public bool Interacting { get; protected set; }
+
+    protected Collider Collider{
         get
         {
             if (_collider == null)
@@ -18,7 +20,7 @@ public class Interactable : MonoBehaviour
     }
     private Collider _collider;
 
-    private Rigidbody Rigidbody
+    protected Rigidbody Rigidbody
     {
         get
         {
@@ -36,21 +38,34 @@ public class Interactable : MonoBehaviour
     //====================================================================================================================//
     
     // Start is called before the first frame update
-    private void Start()
+    protected virtual void Start()
     {
         _originalParent = transform.parent;
     }
 
     //Interactable Functions
     //====================================================================================================================//
+
+    public virtual void StartInteraction()
+    {
+        Interacting = true;
+        SetColliderActive(false);
+    }
     
-    public void SetColliderActive(in bool state)
+    public virtual void StopInteraction()
+    {
+        Interacting = false;
+        ResetParent();
+        SetColliderActive(true);
+    }
+    
+    protected void SetColliderActive(in bool state)
     {
         Collider.enabled = state;
         Rigidbody.isKinematic = !state;
     }
 
-    public void ResetParent()
+    protected void ResetParent()
     {
         transform.SetParent(_originalParent, true);
     }
