@@ -9,6 +9,8 @@ public class Interactable : MonoBehaviour
 
     public bool Interacting { get; protected set; }
 
+    public int foodValue = 1;
+
     protected Collider Collider{
         get
         {

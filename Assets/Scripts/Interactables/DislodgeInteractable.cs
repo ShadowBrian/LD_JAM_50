@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class DislodgeInteractable : Interactable
 {
+    public bool IsDislodged => _dislodgeCount <= 0;
+    
     [SerializeField]
     private Vector2Int dislodgeCountRange;
     private int _dislodgeCount;

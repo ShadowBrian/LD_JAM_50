@@ -45,7 +45,7 @@ public class PushSphereInteractable : Interactable
         if (otherInteractable == null)
             return;
 
-        CollectInteractable(otherInteractable);
+        TryCollectInteractable(otherInteractable);
     }
 
     //====================================================================================================================//
@@ -61,7 +61,7 @@ public class PushSphereInteractable : Interactable
         Interacting = true;
         Rigidbody.isKinematic = false;
         
-        CollectInteractable(forceAdd, false);
+        TryCollectInteractable(forceAdd, false);
     }
 
     public override void StopInteraction()
@@ -96,11 +96,27 @@ public class PushSphereInteractable : Interactable
 
     }
 
-    private void CollectInteractable(in Interactable interactable, bool reposition = true)
+    private void TryCollectInteractable(in Interactable interactable, bool reposition = true)
     {
-        var interactableTransform = interactable.transform;
-        interactable.StartInteraction();
+        switch (interactable)
+        {
+            case DislodgeInteractable dislodgeInteractable:
+                if (dislodgeInteractable.IsDislodged == false)
+                    return;
+                interactable.StartInteraction();
+                break;
+            case PushSphereInteractable pushSphere:
+                //interactable.StartInteraction();
+                pushSphere.Rigidbody.isKinematic = true;
+                pushSphere.Collider.enabled = false;
+                pushSphere.enabled = false;
+                break;
+            case Interactable _:
+                interactable.StartInteraction();
+                break;
+        }
         
+        var interactableTransform = interactable.transform;
         interactableTransform.SetParent(transform, reposition);
 
         if (reposition == false)
