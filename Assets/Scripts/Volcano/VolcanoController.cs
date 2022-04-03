@@ -25,6 +25,7 @@ public class VolcanoController : MonoBehaviour
     //====================================================================================================================//
 
     public static Action OnGameOver;
+    public static Action<Sprite> OnNewFace;
     
     
     [FormerlySerializedAs("faces")] [SerializeField]
@@ -78,7 +79,7 @@ public class VolcanoController : MonoBehaviour
         if (hungerValue >= 1f)
         {
             SetNewFace(angryFace);
-            this.enabled = false;
+            enabled = false;
             
             volcanoFinalAnimation.StartAnimation();
             OnGameOver?.Invoke();
@@ -102,10 +103,11 @@ public class VolcanoController : MonoBehaviour
     {
         _overrideFace = true;
         SetNewFace(happyFace);
+        OnNewFace?.Invoke(happyFace);
         this.DelayedCall(2f, () =>
         {
             _overrideFace = false;
-            SetNewVolcanoState(_stateIndex);
+            SetNewVolcanoState(_stateIndex, false);
         });
 
         _currentHunger = 0;
@@ -129,10 +131,10 @@ public class VolcanoController : MonoBehaviour
         if (_stateIndex == newFaceIndex)
             return;
 
-        SetNewVolcanoState(newFaceIndex);
+        SetNewVolcanoState(newFaceIndex, true);
     }
 
-    private void SetNewVolcanoState(in int newIndex)
+    private void SetNewVolcanoState(in int newIndex, bool announceFace)
     {
         var stateData = states[newIndex];
         
@@ -145,6 +147,9 @@ public class VolcanoController : MonoBehaviour
 
         _mainSmokeModule.startColor = stateData.smokeColor;
 
+        if(announceFace)
+            OnNewFace?.Invoke(stateData.FaceSprite);
+        
         if(_overrideFace == false)
             SetNewFace(stateData.FaceSprite);
     }
@@ -152,6 +157,7 @@ public class VolcanoController : MonoBehaviour
     private void SetNewFace(in Sprite faceSprite)
     {
         faceRenderer.sprite = faceSprite;
+        
     }
 
     //====================================================================================================================//

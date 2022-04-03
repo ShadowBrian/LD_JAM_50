@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -35,6 +34,11 @@ public class UIManager : MonoBehaviour
 
     [SerializeField]
     private TMP_Text promptText;
+
+    [SerializeField]
+    private CanvasGroup faceCanvasGroup;
+    [SerializeField]
+    private Image faceImage;
 
     //Main Menu UI Properties
     //====================================================================================================================//
@@ -81,9 +85,11 @@ public class UIManager : MonoBehaviour
     private void OnEnable()
     {
         VolcanoController.OnGameOver += OnGameOver;
+        VolcanoController.OnNewFace += OnNewFace;
     }
 
-    
+
+
 
     // Start is called before the first frame update
     private void Start()
@@ -116,6 +122,7 @@ public class UIManager : MonoBehaviour
     private void OnDisable()
     {
         VolcanoController.OnGameOver -= OnGameOver;
+        VolcanoController.OnNewFace -= OnNewFace;
     }
 
     //Setup UI
@@ -256,6 +263,38 @@ public class UIManager : MonoBehaviour
 
     //Callback Functions
     //====================================================================================================================//
+    
+    private Coroutine _activeFaceFading;
+    private void OnNewFace(Sprite newFaceSprite)
+    {
+        IEnumerator FadeFaceCoroutine()
+        {
+            const float FADE_TIME = 1f;
+            faceCanvasGroup.alpha = 1f;
+            
+            faceImage.sprite = newFaceSprite;
+            yield return new WaitForSeconds(FADE_TIME);
+            
+            for (float t = 0; t <= FADE_TIME; t+= Time.deltaTime)
+            {
+                faceCanvasGroup.alpha = 1f - (t / FADE_TIME);
+                yield return null;
+            }
+
+            faceCanvasGroup.alpha = 0f;
+            _activeFaceFading = null;
+        }
+
+        if (_activeFaceFading != null)
+        {
+            StopCoroutine(_activeFaceFading);
+            _activeFaceFading = null;
+        }
+        
+        
+
+        _activeFaceFading = StartCoroutine(FadeFaceCoroutine());
+    }
     
     private void OnGameOver()
     {
