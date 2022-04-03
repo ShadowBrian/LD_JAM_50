@@ -23,7 +23,7 @@ public class CameraLook : MonoBehaviour
 
     private Vector2 _mouseDelta;
 
-    private bool _cursorLocked;
+   
 
     //Unity Functions
     //====================================================================================================================//
@@ -37,16 +37,11 @@ public class CameraLook : MonoBehaviour
     private void Start()
     {
         transform = gameObject.transform;
-
-        LockCursor(true);
     }
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.Escape))
-        {
-            LockCursor(!_cursorLocked);
-        }
+        
 
         _mouseDelta.x = Input.GetAxis("Mouse X");
         _mouseDelta.y = Input.GetAxis("Mouse Y");
@@ -93,13 +88,7 @@ public class CameraLook : MonoBehaviour
         
     }
 
-    private void LockCursor(in bool state)
-    {
-        _cursorLocked = state;
-        
-        Cursor.lockState = _cursorLocked ? CursorLockMode.Locked : CursorLockMode.None;
-        Cursor.visible = !_cursorLocked;
-    }
+    
 
     //====================================================================================================================//
     

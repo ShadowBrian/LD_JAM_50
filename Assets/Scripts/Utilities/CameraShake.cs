@@ -73,6 +73,8 @@ public class CameraShake : MonoBehaviour
     
     private void ShakeCamera(float amplitude, float time)
     {
+        AudioController.PlaySound(AudioController.SOUND.RUMBLE, 1f);
+        
         if(_multiChannelPerlin == null)
             _multiChannelPerlin = cinemachineVirtualCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
 

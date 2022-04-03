@@ -59,6 +59,7 @@ public class LavaPit : MonoBehaviour
 
         //TODO Need a way of determining the value
         volcanoController.ProvideFood(foodValue);
+        AudioController.PlaySound(AudioController.SOUND.DISSOLVE, 0.4f);
     }
 
     //====================================================================================================================//

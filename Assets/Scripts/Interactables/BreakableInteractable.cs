@@ -72,6 +72,8 @@ public class BreakableInteractable : Interactable
 
             interactable.Rigidbody.velocity = Random.insideUnitSphere.normalized * 10f;
         }
+        
+        AudioController.PlaySound(AudioController.SOUND.BREAK);
         //TODO Destroy Self
         Destroy(gameObject);
     }

@@ -85,6 +85,14 @@ public class UIManager : MonoBehaviour
         _playerController.enabled = false;
     }
 
+    private void Update()
+    {
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            LockCursor(!_cursorLocked);
+        }
+    }
+
     //Setup UI
     //====================================================================================================================//
 
@@ -100,12 +108,22 @@ public class UIManager : MonoBehaviour
                 _playerController.enabled = true;
                 _volcanoController.enabled = true;
             });
+            AudioController.PlaySound(AudioController.SOUND.UI_Press);
         });
         settingsButton.onClick.AddListener(() =>
         {
-            
+            AudioController.PlaySound(AudioController.SOUND.UI_Press);
         });
         quitButton.onClick.AddListener(Application.Quit);
+    }
+    
+    private bool _cursorLocked;
+    private void LockCursor(in bool state)
+    {
+        _cursorLocked = state;
+        
+        Cursor.lockState = _cursorLocked ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !_cursorLocked;
     }
 
     //====================================================================================================================//
@@ -153,14 +171,17 @@ public class UIManager : MonoBehaviour
             case UISTATE.NONE:
                 menuUIWindow.gameObject.SetActive(false);
                 gameUIWindow.gameObject.SetActive(false);
+                LockCursor(false);
                 break;
             case UISTATE.MENU:
                 menuUIWindow.gameObject.SetActive(true);
                 gameUIWindow.gameObject.SetActive(false);
+                LockCursor(false);
                 break;
             case UISTATE.GAME:
                 menuUIWindow.gameObject.SetActive(false);
                 gameUIWindow.gameObject.SetActive(true);
+                LockCursor(true);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(uiState), uiState, null);

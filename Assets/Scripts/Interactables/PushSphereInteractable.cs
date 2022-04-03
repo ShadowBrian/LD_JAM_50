@@ -146,6 +146,7 @@ public class PushSphereInteractable : Interactable
         /*//Push the ball away to remain in view
         var distanceToPlayer = Vector3.Distance(_playerController.transform.position, transform.position);
         Push(PlayerForward, distanceToPlayer * RESIZE_MULT);*/
+        AudioController.PlaySound(AudioController.SOUND.POP, 0.7f);
     }
 
     //====================================================================================================================//
