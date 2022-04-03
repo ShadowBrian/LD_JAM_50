@@ -6066,6 +6066,11 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: -3.634
       objectReference: {fileID: 0}
+    - target: {fileID: 2761043870326760609, guid: 8e065c464729cfa46bc4e9aeb00428fe,
+        type: 3}
+      propertyPath: maxHunger
+      value: 60
+      objectReference: {fileID: 0}
     - target: {fileID: 3080315942513460147, guid: 8e065c464729cfa46bc4e9aeb00428fe,
         type: 3}
       propertyPath: animationCamera
