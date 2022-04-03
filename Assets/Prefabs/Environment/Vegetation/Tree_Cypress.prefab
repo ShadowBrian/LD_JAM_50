@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6347197289639130001}
   - component: {fileID: 8142172906137514662}
   - component: {fileID: 4688112779658768109}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Tree_Cypress
   m_TagString: Untagged
   m_Icon: {fileID: 0}

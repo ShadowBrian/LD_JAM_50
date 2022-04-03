@@ -71,6 +71,11 @@ public class PlayerPushInteract : MonoBehaviour
             
         }
 
+        UIManager.Instance.ShowPromptWindow(LookingAtInteractable,
+            LookingAtInteractable
+                ? $"{_lookingAtInteractable.ActionVerb} {interactButton} {_lookingAtInteractable.Action}"
+                : string.Empty);
+        
         if (LookingAtInteractable && Input.GetKeyDown(interactButton))
         {
             StartPushingObject();
@@ -127,19 +132,10 @@ public class PlayerPushInteract : MonoBehaviour
                 break;
             }
             //--------------------------------------------------------------------------------------------------------//
-            case DislodgeInteractable dislodgeInteractable:
+            case BreakableInteractable breakableInteractable:
             {
-                if (dislodgeInteractable.TryStartInteraction() == false)
-                    return;
-
-                var lookingAtTransform = dislodgeInteractable.transform;
-                var pushInteractable = Instantiate(pushSphereInteractablePrefab, lookingAtTransform.position,
-                    Quaternion.identity);
-
-                pushInteractable.StartInteraction(dislodgeInteractable);
-                _pushingInteractable = pushInteractable;
-                _lookingAtInteractable = null;
-                break;
+                breakableInteractable.TryStartInteraction();
+                return;
             }
             //--------------------------------------------------------------------------------------------------------//
             case Interactable interactable:
@@ -160,6 +156,8 @@ public class PlayerPushInteract : MonoBehaviour
         }
 
         _interactableDistance = Vector3.Distance(transform.position, _pushingInteractable.transform.position);
+        
+        UIManager.Instance.ShowPromptWindow(false, string.Empty);
     }
 
     private void StopPushingObject()

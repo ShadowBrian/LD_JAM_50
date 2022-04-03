@@ -4,13 +4,15 @@ using UnityEngine;
 
 public class DislodgeInteractable : Interactable
 {
-    public bool IsDislodged => _dislodgeCount <= 0;
+    //public override string Action => "to Dislodge";
     
-    [SerializeField]
+    public bool IsDislodged => false;
+    
+    /*[SerializeField]
     private Vector2Int dislodgeCountRange;
     private int _dislodgeCount;
     [SerializeField]
-    private float dislodgeRotation;
+    private float dislodgeRotation;*/
 
     //Unity Functions
     //====================================================================================================================//
@@ -18,7 +20,7 @@ public class DislodgeInteractable : Interactable
     protected override void Start()
     {
         Rigidbody.isKinematic = true;
-        _dislodgeCount = Random.Range(dislodgeCountRange.x, dislodgeCountRange.y + 1);
+        //_dislodgeCount = Random.Range(dislodgeCountRange.x, dislodgeCountRange.y + 1);
         
         
         base.Start();
@@ -27,30 +29,11 @@ public class DislodgeInteractable : Interactable
     //Interactable Functions
     //====================================================================================================================//
 
-    public bool TryStartInteraction()
-    {
-        if (_dislodgeCount > 0)
-        {
-            if (--_dislodgeCount > 0)
-            {
-                //TODO Apply Random Rotation
-                transform.rotation *= Quaternion.Euler(
-                    Random.Range(-1f, 1f) * dislodgeRotation,
-                    Random.Range(-1f, 1f) * dislodgeRotation, 
-                    Random.Range(-1f, 1f) * dislodgeRotation);
-                return false;
-            }
-            
-            Rigidbody.isKinematic = false;
-            return false;
-        }
 
-        StartInteraction();
-        return true;
-    }
     
     public override void StartInteraction()
     {
+        Rigidbody.isKinematic = false;
         base.StartInteraction();
     }
 

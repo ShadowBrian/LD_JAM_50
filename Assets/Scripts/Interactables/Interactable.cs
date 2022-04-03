@@ -7,11 +7,13 @@ public class Interactable : MonoBehaviour
     //Properties
     //====================================================================================================================//
 
+    public virtual string ActionVerb => "Hold";
+    public virtual string Action => "to Push";
     public bool Interacting { get; protected set; }
 
     public int foodValue = 1;
 
-    protected Collider Collider{
+    protected internal Collider Collider{
         get
         {
             if (_collider == null)
@@ -22,7 +24,7 @@ public class Interactable : MonoBehaviour
     }
     private Collider _collider;
 
-    protected Rigidbody Rigidbody
+    protected internal Rigidbody Rigidbody
     {
         get
         {

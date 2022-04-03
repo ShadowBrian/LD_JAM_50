@@ -100,11 +100,13 @@ public class PushSphereInteractable : Interactable
     {
         switch (interactable)
         {
-            case DislodgeInteractable dislodgeInteractable:
+            case BreakableInteractable _:
+                return;
+            /*case DislodgeInteractable dislodgeInteractable:
                 if (dislodgeInteractable.IsDislodged == false)
                     return;
                 interactable.StartInteraction();
-                break;
+                break;*/
             case PushSphereInteractable pushSphere:
                 //interactable.StartInteraction();
                 pushSphere.Rigidbody.isKinematic = true;
@@ -129,7 +131,7 @@ public class PushSphereInteractable : Interactable
                                          ((interactableTransform.position - transform.position).normalized *
                                           Size * 1.2f);
 
-        SphereCollider.radius = Size *= 1.1f;
+        SphereCollider.radius = Size *= 1.05f;
     }
 
     //====================================================================================================================//
