@@ -73,7 +73,7 @@ public class PlayerPushInteract : MonoBehaviour
 
         UIManager.Instance.ShowPromptWindow(LookingAtInteractable,
             LookingAtInteractable
-                ? $"{_lookingAtInteractable.ActionVerb} {interactButton} {_lookingAtInteractable.Action}"
+                ? $"{_lookingAtInteractable.ActionVerb} <b>{interactButton}</b> {_lookingAtInteractable.Action}"
                 : string.Empty);
         
         if (LookingAtInteractable && Input.GetKeyDown(interactButton))

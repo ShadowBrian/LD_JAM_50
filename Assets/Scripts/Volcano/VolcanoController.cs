@@ -45,7 +45,12 @@ public class VolcanoController : MonoBehaviour
     [SerializeField]
     private float hungerIncreasePerSecond;
     private float _currentHunger;
-    
+
+    [SerializeField]
+    private float shakeAmplitude = 2f;
+    [SerializeField]
+    private float shakeTime = 0.75f;
+
 
     //Unity Functions
     //====================================================================================================================//
@@ -113,6 +118,9 @@ public class VolcanoController : MonoBehaviour
 
         if (_faceIndex == newFaceIndex)
             return;
+        
+        if(newFaceIndex > _faceIndex)
+            CameraShake.Shake(shakeAmplitude, shakeTime);
 
         SetNewFace(newFaceIndex);
     }
