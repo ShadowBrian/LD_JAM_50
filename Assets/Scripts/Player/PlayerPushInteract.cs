@@ -27,6 +27,9 @@ public class PlayerPushInteract : MonoBehaviour
 
     [SerializeField]
     private KeyCode interactButton = KeyCode.Space;
+    
+    [SerializeField]
+    private Arms arms;
 
     [SerializeField]
     private PushSphereInteractable pushSphereInteractablePrefab;
@@ -85,6 +88,14 @@ public class PlayerPushInteract : MonoBehaviour
             StartPushingObject();
             return;
         }
+        if (_lookingAtInteractable == false && Input.GetKeyDown(interactButton))
+        {
+            arms.SetPush(true, false);
+        }
+        if (_lookingAtInteractable == false && Input.GetKeyUp(interactButton))
+        {
+            arms.SetPush(false, false);
+        }
 
         _lookingAtInteractable = LookForInteractable();
     }
@@ -133,12 +144,14 @@ public class PlayerPushInteract : MonoBehaviour
                 _pushingInteractable = pushSphereInteractable;
                 _lookingAtInteractable = null;
                 _pushingInteractable.StartInteraction();
+                arms.SetPush(true, false);
                 break;
             }
             //--------------------------------------------------------------------------------------------------------//
             case BreakableInteractable breakableInteractable:
             {
                 breakableInteractable.TryStartInteraction();
+                arms.SetPushT(1f);
                 return;
             }
             //--------------------------------------------------------------------------------------------------------//
@@ -152,6 +165,7 @@ public class PlayerPushInteract : MonoBehaviour
                 pushInteractable.StartInteraction(interactable);
                 _pushingInteractable = pushInteractable;
                 _lookingAtInteractable = null;
+                arms.SetPush(true, false);
                 break;
             }
             //--------------------------------------------------------------------------------------------------------//
@@ -168,6 +182,8 @@ public class PlayerPushInteract : MonoBehaviour
     {
         _pushingInteractable.StopInteraction();
         _pushingInteractable = null;
+        
+        arms.SetPush(false, false);
     }
 
     private void TryPushObject(in PushSphereInteractable pushingInteractable)

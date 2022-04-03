@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
@@ -13,7 +14,8 @@ public class UIManager : MonoBehaviour
     {
         NONE,
         MENU,
-        GAME
+        GAME,
+        GAME_OVER
     }
 
     //Properties
@@ -39,11 +41,22 @@ public class UIManager : MonoBehaviour
     [Header("Main Menu UI"), SerializeField] 
     private GameObject menuUIWindow;
     [SerializeField]
+    private CanvasGroup mainMenuCanvasGroup;
+    [SerializeField]
     private Button playGameButton;
     [SerializeField]
     private Button settingsButton;
     [SerializeField]
     private Button quitButton;
+    
+    //Main Menu UI Properties
+    //====================================================================================================================//
+    [Header("Game Over UI"), SerializeField] 
+    private GameObject gameOverUIWindow;
+    [SerializeField]
+    private CanvasGroup gameOverCanvasGroup;
+    [SerializeField]
+    private Button restartButton;
 
     //====================================================================================================================//
     
@@ -64,6 +77,13 @@ public class UIManager : MonoBehaviour
         _playerCameraLook = FindObjectOfType<CameraLook>();
         _playerController = FindObjectOfType<PlayerController>();
     }
+
+    private void OnEnable()
+    {
+        VolcanoController.OnGameOver += OnGameOver;
+    }
+
+    
 
     // Start is called before the first frame update
     private void Start()
@@ -92,6 +112,11 @@ public class UIManager : MonoBehaviour
             LockCursor(!_cursorLocked);
         }
     }
+    
+    private void OnDisable()
+    {
+        VolcanoController.OnGameOver -= OnGameOver;
+    }
 
     //Setup UI
     //====================================================================================================================//
@@ -108,12 +133,24 @@ public class UIManager : MonoBehaviour
                 _playerController.enabled = true;
                 _volcanoController.enabled = true;
             });
+            FadeCanvasGroup(mainMenuCanvasGroup, 1f, 0f, 1f);
             AudioController.PlaySound(AudioController.SOUND.UI_Press);
         });
         settingsButton.onClick.AddListener(() =>
         {
             AudioController.PlaySound(AudioController.SOUND.UI_Press);
         });
+        
+        restartButton.onClick.AddListener(() =>
+        {
+            FadeUI(0f,1f, 1f);
+            this.DelayedCall(1.1f, () =>
+            {
+                SceneManager.LoadScene(0);
+            });
+            
+        });
+        
         quitButton.onClick.AddListener(Application.Quit);
     }
     
@@ -135,7 +172,7 @@ public class UIManager : MonoBehaviour
         promptText.text = displayText;
     }
 
-    public void FadeUI(float fadeFromAlpha, float fadeToAlpha, float fadeTime)
+    private void FadeUI(float fadeFromAlpha, float fadeToAlpha, float fadeTime)
     {
         IEnumerator FadeCoroutine()
         {
@@ -162,6 +199,23 @@ public class UIManager : MonoBehaviour
         StartCoroutine(FadeCoroutine());
     }
 
+    private void FadeCanvasGroup(CanvasGroup target, float fadeFromAlpha, float fadeToAlpha, float fadeTime)
+    {
+        IEnumerator FadeCoroutine()
+        {
+            target.alpha = fadeFromAlpha;
+            
+            for (float t = 0; t <= fadeTime; t+=Time.deltaTime)
+            {
+                target.alpha = Mathf.Lerp(fadeFromAlpha, fadeToAlpha, t / fadeTime);
+                yield return null;
+            }
+            target.alpha = fadeToAlpha;
+        }
+
+        StartCoroutine(FadeCoroutine());
+    }
+
     //====================================================================================================================//
 
     private void SetUIState(in UISTATE uiState)
@@ -171,21 +225,48 @@ public class UIManager : MonoBehaviour
             case UISTATE.NONE:
                 menuUIWindow.gameObject.SetActive(false);
                 gameUIWindow.gameObject.SetActive(false);
+                gameOverUIWindow.gameObject.SetActive(false);
                 LockCursor(false);
                 break;
             case UISTATE.MENU:
                 menuUIWindow.gameObject.SetActive(true);
                 gameUIWindow.gameObject.SetActive(false);
+                gameOverUIWindow.gameObject.SetActive(false);
                 LockCursor(false);
                 break;
             case UISTATE.GAME:
-                menuUIWindow.gameObject.SetActive(false);
+                mainMenuCanvasGroup.interactable = false;
+                mainMenuCanvasGroup.blocksRaycasts = false;
+                //menuUIWindow.gameObject.SetActive(false);
                 gameUIWindow.gameObject.SetActive(true);
+                gameOverUIWindow.gameObject.SetActive(false);
                 LockCursor(true);
+                break;
+            case UISTATE.GAME_OVER:
+                menuUIWindow.gameObject.SetActive(false);
+                gameUIWindow.gameObject.SetActive(false);
+                gameOverUIWindow.gameObject.SetActive(true);
+                LockCursor(false);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(uiState), uiState, null);
         }
         
     }
+
+    //Callback Functions
+    //====================================================================================================================//
+    
+    private void OnGameOver()
+    {
+        gameOverCanvasGroup.alpha = 0f;
+        this.DelayedCall(5, () =>
+        {
+            FadeCanvasGroup(gameOverCanvasGroup, 0f, 1f, 1f);
+            SetUIState(UISTATE.GAME_OVER);
+        });
+    }
+
+    //====================================================================================================================//
+    
 }
