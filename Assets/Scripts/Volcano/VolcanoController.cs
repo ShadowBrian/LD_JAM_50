@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class VolcanoController : MonoBehaviour
 {
@@ -11,22 +12,26 @@ public class VolcanoController : MonoBehaviour
     //====================================================================================================================//
 
     [Serializable]
-    private struct FaceHungerIndex
+    private struct VolcanoStateData
     {
         public Sprite FaceSprite;
         public float hungerValue;
+        public Color smokeColor;
+        public float shakeAmplitude;
+        public float shakeDuration;
     }
 
     //Properties
     //====================================================================================================================//
+
+    public static Action OnGameOver;
     
     
-    
-    [SerializeField]
-    private FaceHungerIndex[] faces;
+    [FormerlySerializedAs("faces")] [SerializeField]
+    private VolcanoStateData[] states;
     [SerializeField]
     private SpriteRenderer faceRenderer;
-    private int _faceIndex = -1;
+    private int _stateIndex = -1;
     private bool _overrideFace;
 
     [SerializeField]
@@ -47,9 +52,9 @@ public class VolcanoController : MonoBehaviour
     private float _currentHunger;
 
     [SerializeField]
-    private float shakeAmplitude = 2f;
-    [SerializeField]
-    private float shakeTime = 0.75f;
+    private ParticleSystem smokeParticleSystem;
+    private ParticleSystem.MainModule _mainSmokeModule;
+    [SerializeField] private VolcanoFinalAnimation volcanoFinalAnimation;
 
 
     //Unity Functions
@@ -58,7 +63,7 @@ public class VolcanoController : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
-        
+        _mainSmokeModule = smokeParticleSystem.main;
     }
 
     // Update is called once per frame
@@ -73,10 +78,14 @@ public class VolcanoController : MonoBehaviour
         if (hungerValue >= 1f)
         {
             SetNewFace(angryFace);
+            this.enabled = false;
+            
+            volcanoFinalAnimation.StartAnimation();
+            OnGameOver?.Invoke();
         }
         else
         {
-            TryUpdateHungerFace(hungerValue);
+            TryUpdateVolcanoState(hungerValue);
         }
 
         
@@ -96,41 +105,48 @@ public class VolcanoController : MonoBehaviour
         this.DelayedCall(2f, () =>
         {
             _overrideFace = false;
-            SetNewFace(_faceIndex);
+            SetNewVolcanoState(_stateIndex);
         });
 
-        _currentHunger -= amount;
+        _currentHunger = 0;
+        /*_currentHunger -= amount;
         if (_currentHunger < 0)
-            _currentHunger = 0;
+            _currentHunger = 0;*/
     }
 
-    private void TryUpdateHungerFace(in float hungerValue)
+    private void TryUpdateVolcanoState(in float hungerValue)
     {
         int newFaceIndex = -1;
-        for (int i = 0; i < faces.Length; i++)
+        for (int i = 0; i < states.Length; i++)
         {
-            if (hungerValue > faces[i].hungerValue) 
+            if (hungerValue > states[i].hungerValue) 
                 continue;
             
             newFaceIndex = i;
             break;
         }
 
-        if (_faceIndex == newFaceIndex)
+        if (_stateIndex == newFaceIndex)
             return;
-        
-        if(newFaceIndex > _faceIndex)
-            CameraShake.Shake(shakeAmplitude, shakeTime);
 
-        SetNewFace(newFaceIndex);
+        SetNewVolcanoState(newFaceIndex);
     }
 
-    private void SetNewFace(in int index)
+    private void SetNewVolcanoState(in int newIndex)
     {
-        _faceIndex = index;
+        var stateData = states[newIndex];
+        
+        if (newIndex > _stateIndex && newIndex != 0)
+        {
+            CameraShake.Shake(stateData.shakeAmplitude, stateData.shakeDuration);
+        }
+        
+        _stateIndex = newIndex;
+
+        _mainSmokeModule.startColor = stateData.smokeColor;
 
         if(_overrideFace == false)
-            SetNewFace(faces[index].FaceSprite);
+            SetNewFace(stateData.FaceSprite);
     }
 
     private void SetNewFace(in Sprite faceSprite)

@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 2905029069551773940}
   - component: {fileID: 2905029069551773941}
   - component: {fileID: 2905029069551773938}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -84,6 +84,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speedMultRange: {x: 0.1, y: 1}
   ballSizeRange: {x: 0.5, y: 10}
+  pushObjectDistanceMult: 6
   playerController: {fileID: 2905029069551773942}
   cameraTransform: {fileID: 2905029070707289392}
   raycastMask:
@@ -200,7 +201,7 @@ GameObject:
   - component: {fileID: 2905029069844670697}
   - component: {fileID: 2905029069844670698}
   - component: {fileID: 3264895511041008629}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: cm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -261,7 +262,7 @@ GameObject:
   - component: {fileID: 2905029070707289392}
   - component: {fileID: 2905029070707289395}
   - component: {fileID: 9137683968532555153}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: FPSCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -331,3 +332,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cinemachineVirtualCamera: {fileID: 2905029070707289395}
+  testAmplitude: 1
+  testTime: 0.5

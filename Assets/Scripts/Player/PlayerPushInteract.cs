@@ -10,6 +10,9 @@ public class PlayerPushInteract : MonoBehaviour
     private Vector2 speedMultRange;
     [SerializeField]
     private Vector2 ballSizeRange;
+
+    [SerializeField]
+    private float pushObjectDistanceMult = 6f;
     
     [SerializeField]
     private PlayerController playerController;
@@ -43,7 +46,7 @@ public class PlayerPushInteract : MonoBehaviour
 
     private void OnEnable()
     {
-        CameraLook.OnForwardChanged += ForwardChanged;
+        //CameraLook.OnForwardChanged += ForwardChanged;
         PlayerController.OnInputChanged += OnInputChanged;
     }
 
@@ -68,7 +71,8 @@ public class PlayerPushInteract : MonoBehaviour
 
             if (_pushingInteractable is PushSphereInteractable pushingInteractable)
                 TryPushObject(pushingInteractable);
-            
+
+            ForwardChanged(default);
         }
 
         UIManager.Instance.ShowPromptWindow(LookingAtInteractable,
@@ -168,10 +172,13 @@ public class PlayerPushInteract : MonoBehaviour
 
     private void TryPushObject(in PushSphereInteractable pushingInteractable)
     {
-        var direction = Vector3.zero;
-        direction += playerController.transform.forward.normalized * _currentInput.y;
-        direction += playerController.transform.right.normalized * _currentInput.x;
+        var playerForward = playerController.transform.forward.normalized;
         
+        var direction = Vector3.zero;
+        direction += playerForward * _currentInput.y;
+        direction += playerController.transform.right.normalized * _currentInput.x;
+
+        pushingInteractable.PlayerForward = playerForward;
         pushingInteractable.Push(direction, playerController.CurrentMoveSpeed);
 
         playerController.SpeedMultiplier = Mathf.Lerp(speedMultRange.x, speedMultRange.y,
@@ -186,21 +193,24 @@ public class PlayerPushInteract : MonoBehaviour
         _currentInput.x = x;
         _currentInput.y = y;
     }
-    
+
     private void ForwardChanged(float deg)
     {
-        if (PushingObject && _pushingInteractable is PushSphereInteractable pushingInteractable)
-        {
-            var expectedPosition = transform.position + (transform.forward.normalized * _interactableDistance);
-            
-            var dist = (expectedPosition - pushingInteractable.transform.position);
-            var mag = dist.magnitude;
-            
-            pushingInteractable.Push(dist.normalized, mag * mag * mag);
+        if (!PushingObject || !(_pushingInteractable is PushSphereInteractable pushingInteractable))
+            return;
 
-            playerController.SpeedMultiplier = Mathf.Lerp(speedMultRange.x, speedMultRange.y,
-                Mathf.InverseLerp(ballSizeRange.y, ballSizeRange.x, pushingInteractable.Size));
-        }
+        var distance = pushingInteractable.Size * pushObjectDistanceMult;
+
+
+        var expectedPosition = transform.position + (transform.forward.normalized * distance);
+
+        var dist = (expectedPosition - pushingInteractable.transform.position);
+        var mag = dist.magnitude;
+
+        pushingInteractable.Push(dist.normalized, mag * mag * mag);
+
+        playerController.SpeedMultiplier = Mathf.Lerp(speedMultRange.x, speedMultRange.y,
+            Mathf.InverseLerp(ballSizeRange.y, ballSizeRange.x, pushingInteractable.Size));
     }
 
     //====================================================================================================================//

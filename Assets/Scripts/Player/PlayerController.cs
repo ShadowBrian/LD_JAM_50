@@ -37,7 +37,12 @@ public class PlayerController : MonoBehaviour
 
     //Unity Functions
     //====================================================================================================================//
-    
+
+    private void OnEnable()
+    {
+        VolcanoController.OnGameOver += OnGameOver;
+    }
+
     // Start is called before the first frame update
     private void Start()
     {
@@ -76,7 +81,16 @@ public class PlayerController : MonoBehaviour
         _lastInputState = _inputState;
         OnInputChanged?.Invoke(_inputState.x, _inputState.y);
     }
+    
+    private void OnDisable()
+    {
+        VolcanoController.OnGameOver -= OnGameOver;
+    }
 
     //====================================================================================================================//
-    
+
+    private void OnGameOver()
+    {
+        enabled = false;
+    }
 }

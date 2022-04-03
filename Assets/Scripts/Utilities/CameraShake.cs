@@ -58,6 +58,11 @@ public class CameraShake : MonoBehaviour
 
     //====================================================================================================================//
 
+    public static void SetActiveCamera(CinemachineVirtualCamera virtualCamera)
+    {
+        Instance.cinemachineVirtualCamera = virtualCamera;
+        Instance._multiChannelPerlin = virtualCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+    }
     public static void Shake(float amplitude, float time)
     {
         if (Instance == null)

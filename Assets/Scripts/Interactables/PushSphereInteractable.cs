@@ -6,8 +6,11 @@ using UnityEngine;
 [RequireComponent(typeof(SphereCollider))]
 public class PushSphereInteractable : Interactable
 {
-
+    public const float RESIZE_MULT = 0.05f;
     public float Size { get; private set; }
+    public int AttachedObjects { get; private set; }
+
+    private static PlayerController _playerController;
 
     private SphereCollider SphereCollider
     {
@@ -20,14 +23,18 @@ public class PushSphereInteractable : Interactable
         }
     }
     private SphereCollider _sphereCollider;
-    
-    
+
+    public Vector3 PlayerForward { get; set; }
+
 
     //Unity Functions
     //====================================================================================================================//
     
     protected override void Start()
     {
+        if (!_playerController)
+            _playerController = FindObjectOfType<PlayerController>();
+        
         base.Start();
 
         Rigidbody.isKinematic = Interacting == false;
@@ -72,6 +79,7 @@ public class PushSphereInteractable : Interactable
 
     //====================================================================================================================//
     
+    
     public void Push(in Vector3 direction, in float speed)
     {
         const float LENGTH = 4f;
@@ -98,6 +106,7 @@ public class PushSphereInteractable : Interactable
 
     private void TryCollectInteractable(in Interactable interactable, bool reposition = true)
     {
+        
         switch (interactable)
         {
             case BreakableInteractable _:
@@ -131,7 +140,12 @@ public class PushSphereInteractable : Interactable
                                          ((interactableTransform.position - transform.position).normalized *
                                           Size * 1.2f);
 
-        SphereCollider.radius = Size *= 1.05f;
+        SphereCollider.radius = Size *= 1f + RESIZE_MULT;
+
+        AttachedObjects++;
+        /*//Push the ball away to remain in view
+        var distanceToPlayer = Vector3.Distance(_playerController.transform.position, transform.position);
+        Push(PlayerForward, distanceToPlayer * RESIZE_MULT);*/
     }
 
     //====================================================================================================================//

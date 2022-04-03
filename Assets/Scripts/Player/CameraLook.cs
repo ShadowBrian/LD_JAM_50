@@ -21,9 +21,6 @@ public class CameraLook : MonoBehaviour
     private Transform cameraTransform;
     private Transform transform;
 
-    private Vector2 _lastMousePosition;
-    private Vector2 _currentMousePosition;
-    [SerializeField]
     private Vector2 _mouseDelta;
 
     private bool _cursorLocked;
@@ -31,12 +28,16 @@ public class CameraLook : MonoBehaviour
     //Unity Functions
     //====================================================================================================================//
     
+    private void OnEnable()
+    {
+        VolcanoController.OnGameOver += OnGameOver;
+    }
+    
     // Start is called before the first frame update
     private void Start()
     {
         transform = gameObject.transform;
 
-        _lastMousePosition = _currentMousePosition = Vector2.zero;
         LockCursor(true);
     }
 
@@ -49,17 +50,17 @@ public class CameraLook : MonoBehaviour
 
         _mouseDelta.x = Input.GetAxis("Mouse X");
         _mouseDelta.y = Input.GetAxis("Mouse Y");
-        //_lastMousePosition = _currentMousePosition;
-        //_currentMousePosition = Input.mousePosition;
-//
-        //_mouseDelta = (_currentMousePosition - _lastMousePosition) / Time.deltaTime;
-        
         UpdateCameraPitch();
     }
 
     private void LateUpdate()
     {
         UpdateForwardFacingDirection();
+    }
+    
+    private void OnDisable()
+    {
+        VolcanoController.OnGameOver -= OnGameOver;
     }
 
     //====================================================================================================================//
@@ -101,5 +102,10 @@ public class CameraLook : MonoBehaviour
     }
 
     //====================================================================================================================//
+    
+    private void OnGameOver()
+    {
+        enabled = false;
+    }
     
 }
