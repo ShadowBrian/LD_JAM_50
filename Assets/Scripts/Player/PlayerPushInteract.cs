@@ -13,6 +13,9 @@ public class PlayerPushInteract : MonoBehaviour
 
     [SerializeField]
     private float pushObjectDistanceMult = 6f;
+
+    [SerializeField, Min(1)]
+    private float maxDistance = 10f;
     
     [SerializeField]
     private PlayerController playerController;
@@ -215,12 +218,12 @@ public class PlayerPushInteract : MonoBehaviour
         if (!PushingObject || !(_pushingInteractable is PushSphereInteractable pushingInteractable))
             return;
 
-        var distance = pushingInteractable.Size * pushObjectDistanceMult;
+        var distance = Mathf.Min(pushingInteractable.Size * pushObjectDistanceMult,maxDistance);
 
 
         var expectedPosition = transform.position + (transform.forward.normalized * distance);
 
-        var dist = (expectedPosition - pushingInteractable.transform.position);
+        var dist = Vector3.ProjectOnPlane(expectedPosition - pushingInteractable.transform.position, Vector3.up);
         var mag = dist.magnitude;
 
         pushingInteractable.Push(dist.normalized, mag * mag * mag);

@@ -166,6 +166,7 @@ MonoBehaviour:
   speedMultRange: {x: 0.1, y: 1}
   ballSizeRange: {x: 0.5, y: 10}
   pushObjectDistanceMult: 6
+  maxDistance: 5.5
   playerController: {fileID: 2905029069551773942}
   cameraTransform: {fileID: 2905029070707289392}
   raycastMask:

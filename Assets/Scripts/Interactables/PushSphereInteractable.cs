@@ -6,7 +6,9 @@ using UnityEngine;
 [RequireComponent(typeof(SphereCollider))]
 public class PushSphereInteractable : Interactable
 {
-    public const float RESIZE_MULT = 0.05f;
+    private const float MAX_SIZE = 2f;
+    
+    public const float RESIZE_MULT = 0.025f;
     public float Size { get; private set; }
     public int AttachedObjects { get; private set; }
 
@@ -139,8 +141,8 @@ public class PushSphereInteractable : Interactable
         interactableTransform.position = transform.position +
                                          ((interactableTransform.position - transform.position).normalized *
                                           Size * 1.2f);
-
-        SphereCollider.radius = Size *= 1f + RESIZE_MULT;
+        Size = Mathf.Min(Size * (1f + RESIZE_MULT), MAX_SIZE);
+        SphereCollider.radius = Size;
 
         AttachedObjects++;
         /*//Push the ball away to remain in view
