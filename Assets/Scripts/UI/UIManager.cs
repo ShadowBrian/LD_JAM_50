@@ -20,15 +20,15 @@ public class UIManager : MonoBehaviour
     //Properties
     //====================================================================================================================//
 
-    [Header("Fading"),SerializeField]
+    [Header("Fading"), SerializeField]
     private Image fadeImage;
     private bool _fading;
-    
+
     //GameUI Properties
     //====================================================================================================================//
 
     [Header("Game UI"), SerializeField] private GameObject gameUIWindow;
-    
+
     [SerializeField]
     private GameObject promptImageObject;
 
@@ -42,7 +42,7 @@ public class UIManager : MonoBehaviour
 
     //Main Menu UI Properties
     //====================================================================================================================//
-    [Header("Main Menu UI"), SerializeField] 
+    [Header("Main Menu UI"), SerializeField]
     private GameObject menuUIWindow;
     [SerializeField]
     private CanvasGroup mainMenuCanvasGroup;
@@ -52,10 +52,10 @@ public class UIManager : MonoBehaviour
     private Button settingsButton;
     [SerializeField]
     private Button quitButton;
-    
+
     //Main Menu UI Properties
     //====================================================================================================================//
-    [Header("Game Over UI"), SerializeField] 
+    [Header("Game Over UI"), SerializeField]
     private GameObject gameOverUIWindow;
     [SerializeField]
     private CanvasGroup gameOverCanvasGroup;
@@ -63,7 +63,7 @@ public class UIManager : MonoBehaviour
     private Button restartButton;
 
     //====================================================================================================================//
-    
+
 
     private VolcanoController _volcanoController;
     private CameraLook _playerCameraLook;
@@ -96,7 +96,9 @@ public class UIManager : MonoBehaviour
     {
 
         FadeUI(1f, 0f, 1.5f);
-        
+
+
+
 #if UNITY_WEBGL
         quitButton.gameObject.SetActive(false);
 #endif
@@ -104,21 +106,32 @@ public class UIManager : MonoBehaviour
         SetupButtons();
         SetUIState(UISTATE.MENU);
         ShowPromptWindow(false, string.Empty);
-        
+
         _playerCameraLook.gameObject.SetActive(false);
         _playerCameraLook.enabled = false;
         _volcanoController.enabled = false;
         _playerController.enabled = false;
+
+        _playerCameraLook.gameObject.SetActive(true);
+        SetUIState(UISTATE.GAME);
+        this.DelayedCall(1.6f, () =>
+        {
+            _playerCameraLook.enabled = true;
+            _playerController.enabled = true;
+            _volcanoController.enabled = true;
+        });
+        FadeCanvasGroup(mainMenuCanvasGroup, 1f, 0f, 1f);
+        AudioController.PlaySound(AudioController.SOUND.UI_Press);
     }
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.Escape))
+        /*if (Input.GetKey(KeyCode.Escape))
         {
             LockCursor(!_cursorLocked);
-        }
+        }*/
     }
-    
+
     private void OnDisable()
     {
         VolcanoController.OnGameOver -= OnGameOver;
@@ -133,7 +146,7 @@ public class UIManager : MonoBehaviour
         playGameButton.onClick.AddListener(() =>
         {
             _playerCameraLook.gameObject.SetActive(true);
-           SetUIState(UISTATE.GAME);
+            SetUIState(UISTATE.GAME);
             this.DelayedCall(1.6f, () =>
             {
                 _playerCameraLook.enabled = true;
@@ -147,25 +160,25 @@ public class UIManager : MonoBehaviour
         {
             AudioController.PlaySound(AudioController.SOUND.UI_Press);
         });
-        
+
         restartButton.onClick.AddListener(() =>
         {
-            FadeUI(0f,1f, 1f);
+            FadeUI(0f, 1f, 1f);
             this.DelayedCall(1.1f, () =>
             {
                 SceneManager.LoadScene(0);
             });
-            
+
         });
-        
+
         quitButton.onClick.AddListener(Application.Quit);
     }
-    
+
     private bool _cursorLocked;
     private void LockCursor(in bool state)
     {
         _cursorLocked = state;
-        
+
         Cursor.lockState = _cursorLocked ? CursorLockMode.Locked : CursorLockMode.None;
         Cursor.visible = !_cursorLocked;
     }
@@ -188,13 +201,13 @@ public class UIManager : MonoBehaviour
             color.a = fadeFromAlpha;
             fadeImage.color = color;
 
-            for (float t = 0; t <= fadeTime; t+=Time.deltaTime)
+            for (float t = 0; t <= fadeTime; t += Time.deltaTime)
             {
                 color.a = Mathf.Lerp(fadeFromAlpha, fadeToAlpha, t / fadeTime);
                 fadeImage.color = color;
                 yield return null;
             }
-            
+
             color.a = fadeToAlpha;
             fadeImage.color = color;
             _fading = false;
@@ -202,7 +215,7 @@ public class UIManager : MonoBehaviour
 
         if (_fading)
             return;
-        
+
         StartCoroutine(FadeCoroutine());
     }
 
@@ -211,8 +224,8 @@ public class UIManager : MonoBehaviour
         IEnumerator FadeCoroutine()
         {
             target.alpha = fadeFromAlpha;
-            
-            for (float t = 0; t <= fadeTime; t+=Time.deltaTime)
+
+            for (float t = 0; t <= fadeTime; t += Time.deltaTime)
             {
                 target.alpha = Mathf.Lerp(fadeFromAlpha, fadeToAlpha, t / fadeTime);
                 yield return null;
@@ -258,12 +271,12 @@ public class UIManager : MonoBehaviour
             default:
                 throw new ArgumentOutOfRangeException(nameof(uiState), uiState, null);
         }
-        
+
     }
 
     //Callback Functions
     //====================================================================================================================//
-    
+
     private Coroutine _activeFaceFading;
     private void OnNewFace(Sprite newFaceSprite)
     {
@@ -271,11 +284,11 @@ public class UIManager : MonoBehaviour
         {
             const float FADE_TIME = 1f;
             faceCanvasGroup.alpha = 1f;
-            
+
             faceImage.sprite = newFaceSprite;
             yield return new WaitForSeconds(FADE_TIME);
-            
-            for (float t = 0; t <= FADE_TIME; t+= Time.deltaTime)
+
+            for (float t = 0; t <= FADE_TIME; t += Time.deltaTime)
             {
                 faceCanvasGroup.alpha = 1f - (t / FADE_TIME);
                 yield return null;
@@ -290,12 +303,12 @@ public class UIManager : MonoBehaviour
             StopCoroutine(_activeFaceFading);
             _activeFaceFading = null;
         }
-        
-        
+
+
 
         _activeFaceFading = StartCoroutine(FadeFaceCoroutine());
     }
-    
+
     private void OnGameOver()
     {
         gameOverCanvasGroup.alpha = 0f;
@@ -307,5 +320,5 @@ public class UIManager : MonoBehaviour
     }
 
     //====================================================================================================================//
-    
+
 }

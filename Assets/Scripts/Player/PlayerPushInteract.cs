@@ -16,7 +16,7 @@ public class PlayerPushInteract : MonoBehaviour
 
     [SerializeField, Min(1)]
     private float maxDistance = 10f;
-    
+
     [SerializeField]
     private PlayerController playerController;
     [SerializeField]
@@ -29,8 +29,8 @@ public class PlayerPushInteract : MonoBehaviour
     private float castLength = 5f;
 
     [SerializeField]
-    private KeyCode interactButton = KeyCode.Space;
-    
+    private string interactButton = "Trigger";
+
     [SerializeField]
     private Arms arms;
 
@@ -40,7 +40,7 @@ public class PlayerPushInteract : MonoBehaviour
     private bool PushingObject => _pushingInteractable != null;
     private Interactable _pushingInteractable;
     private float _interactableDistance;
-    
+
     private bool LookingAtInteractable => PushingObject == false && _lookingAtInteractable != null;
     private Interactable _lookingAtInteractable;
     private Dictionary<Transform, Interactable> _lookAtHistoryDict;
@@ -69,9 +69,10 @@ public class PlayerPushInteract : MonoBehaviour
     {
         if (PushingObject)
         {
-            if (Input.GetKey(interactButton) == false)
+            if (UnityXRInputBridge.instance.GetButton(XRButtonMasks.triggerButton, XRHandSide.LeftHand) == false && UnityXRInputBridge.instance.GetButton(XRButtonMasks.triggerButton, XRHandSide.RightHand) == false)
             {
                 StopPushingObject();
+                arms.SetPush(false, UnityXRInputBridge.instance.GetButton(XRButtonMasks.triggerButton, XRHandSide.LeftHand), UnityXRInputBridge.instance.GetButton(XRButtonMasks.triggerButton, XRHandSide.RightHand));
                 return;
             }
 
@@ -85,24 +86,25 @@ public class PlayerPushInteract : MonoBehaviour
             LookingAtInteractable
                 ? $"{_lookingAtInteractable.ActionVerb} <b>{interactButton}</b> {_lookingAtInteractable.Action}"
                 : string.Empty);
-        
-        if (LookingAtInteractable && Input.GetKeyDown(interactButton))
+
+        if (LookingAtInteractable && (UnityXRInputBridge.instance.GetButtonDown(XRButtonMasks.triggerButton, XRHandSide.LeftHand) || UnityXRInputBridge.instance.GetButtonDown(XRButtonMasks.triggerButton, XRHandSide.RightHand)))
         {
             StartPushingObject();
+            arms.SetPush(false, UnityXRInputBridge.instance.GetButton(XRButtonMasks.triggerButton, XRHandSide.LeftHand), UnityXRInputBridge.instance.GetButton(XRButtonMasks.triggerButton, XRHandSide.RightHand));
             return;
         }
-        if (_lookingAtInteractable == false && Input.GetKeyDown(interactButton))
+        if (_lookingAtInteractable == false && (UnityXRInputBridge.instance.GetButtonDown(XRButtonMasks.triggerButton, XRHandSide.LeftHand) || UnityXRInputBridge.instance.GetButtonDown(XRButtonMasks.triggerButton, XRHandSide.RightHand)))
         {
-            arms.SetPush(true, false);
+            arms.SetPush(false, UnityXRInputBridge.instance.GetButton(XRButtonMasks.triggerButton, XRHandSide.LeftHand), UnityXRInputBridge.instance.GetButton(XRButtonMasks.triggerButton, XRHandSide.RightHand));
         }
-        if (_lookingAtInteractable == false && Input.GetKeyUp(interactButton))
+        if (_lookingAtInteractable == false && (UnityXRInputBridge.instance.GetButtonUp(XRButtonMasks.triggerButton, XRHandSide.LeftHand) || UnityXRInputBridge.instance.GetButtonUp(XRButtonMasks.triggerButton, XRHandSide.RightHand)))
         {
-            arms.SetPush(false, false);
+            arms.SetPush(false, UnityXRInputBridge.instance.GetButton(XRButtonMasks.triggerButton, XRHandSide.LeftHand), UnityXRInputBridge.instance.GetButton(XRButtonMasks.triggerButton, XRHandSide.RightHand));
         }
 
         _lookingAtInteractable = LookForInteractable();
     }
-    
+
     private void OnDisable()
     {
         CameraLook.OnForwardChanged -= ForwardChanged;
@@ -117,12 +119,12 @@ public class PlayerPushInteract : MonoBehaviour
         var direction = cameraTransform.forward.normalized;
 
         var didHitInteractable = Physics.Raycast(
-            origin, 
+            origin,
             direction,
-            out var hit, 
+            out var hit,
             castLength,
             raycastMask.value);
-        
+
         Debug.DrawRay(origin, direction * castLength, didHitInteractable ? Color.green : Color.yellow);
 
         if (didHitInteractable == false)
@@ -130,10 +132,10 @@ public class PlayerPushInteract : MonoBehaviour
 
         if (_lookAtHistoryDict.TryGetValue(hit.transform, out var lookingAt))
             return lookingAt;
-        
+
         var newInteractable = hit.transform.gameObject.GetComponent<Interactable>();
         _lookAtHistoryDict.Add(hit.transform, newInteractable);
-        
+
         return newInteractable;
     }
 
@@ -143,41 +145,41 @@ public class PlayerPushInteract : MonoBehaviour
         {
             //--------------------------------------------------------------------------------------------------------//
             case PushSphereInteractable pushSphereInteractable:
-            {
-                _pushingInteractable = pushSphereInteractable;
-                _lookingAtInteractable = null;
-                _pushingInteractable.StartInteraction();
-                arms.SetPush(true, false);
-                break;
-            }
+                {
+                    _pushingInteractable = pushSphereInteractable;
+                    _lookingAtInteractable = null;
+                    _pushingInteractable.StartInteraction();
+                    arms.SetPush(true, false);
+                    break;
+                }
             //--------------------------------------------------------------------------------------------------------//
             case BreakableInteractable breakableInteractable:
-            {
-                breakableInteractable.TryStartInteraction();
-                arms.SetPushT(1f);
-                return;
-            }
+                {
+                    breakableInteractable.TryStartInteraction();
+                    arms.SetPushT(1f);
+                    return;
+                }
             //--------------------------------------------------------------------------------------------------------//
             case Interactable interactable:
-            {
-                interactable.StartInteraction();
-                var lookingAtTransform = interactable.transform;
-                var pushInteractable = Instantiate(pushSphereInteractablePrefab, lookingAtTransform.position,
-                    Quaternion.identity);
+                {
+                    interactable.StartInteraction();
+                    var lookingAtTransform = interactable.transform;
+                    var pushInteractable = Instantiate(pushSphereInteractablePrefab, lookingAtTransform.position,
+                        Quaternion.identity);
 
-                pushInteractable.StartInteraction(interactable);
-                _pushingInteractable = pushInteractable;
-                _lookingAtInteractable = null;
-                arms.SetPush(true, false);
-                break;
-            }
+                    pushInteractable.StartInteraction(interactable);
+                    _pushingInteractable = pushInteractable;
+                    _lookingAtInteractable = null;
+                    arms.SetPush(true, false);
+                    break;
+                }
             //--------------------------------------------------------------------------------------------------------//
             default:
                 throw new Exception();
         }
 
-        _interactableDistance = Vector3.Distance(transform.position, _pushingInteractable.transform.position);
-        
+        _interactableDistance = Vector3.Distance(cameraTransform.transform.position, _pushingInteractable.transform.position);
+
         UIManager.Instance.ShowPromptWindow(false, string.Empty);
     }
 
@@ -185,17 +187,17 @@ public class PlayerPushInteract : MonoBehaviour
     {
         _pushingInteractable.StopInteraction();
         _pushingInteractable = null;
-        
+
         arms.SetPush(false, false);
     }
 
     private void TryPushObject(in PushSphereInteractable pushingInteractable)
     {
-        var playerForward = playerController.transform.forward.normalized;
-        
+        var playerForward = cameraTransform.transform.forward.normalized;
+
         var direction = Vector3.zero;
         direction += playerForward * _currentInput.y;
-        direction += playerController.transform.right.normalized * _currentInput.x;
+        direction += cameraTransform.transform.right.normalized * _currentInput.x;
 
         pushingInteractable.PlayerForward = playerForward;
         pushingInteractable.Push(direction, playerController.CurrentMoveSpeed);
@@ -206,7 +208,7 @@ public class PlayerPushInteract : MonoBehaviour
 
     //Callback Functions
     //====================================================================================================================//
-    
+
     private void OnInputChanged(int x, int y)
     {
         _currentInput.x = x;
@@ -218,10 +220,10 @@ public class PlayerPushInteract : MonoBehaviour
         if (!PushingObject || !(_pushingInteractable is PushSphereInteractable pushingInteractable))
             return;
 
-        var distance = Mathf.Min(pushingInteractable.Size * pushObjectDistanceMult,maxDistance);
+        var distance = Mathf.Min(pushingInteractable.Size * pushObjectDistanceMult, maxDistance);
 
 
-        var expectedPosition = transform.position + (transform.forward.normalized * distance);
+        var expectedPosition = cameraTransform.transform.position + (cameraTransform.transform.forward.normalized * distance);
 
         var dist = Vector3.ProjectOnPlane(expectedPosition - pushingInteractable.transform.position, Vector3.up);
         var mag = dist.magnitude;

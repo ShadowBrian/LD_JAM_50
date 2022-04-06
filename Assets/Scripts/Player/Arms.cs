@@ -8,7 +8,7 @@ public class Arms : MonoBehaviour
     private SpriteRenderer leftArmRenderer;
     private Transform _leftArmTransform;
     private Vector3 _leftArmStartPosition;
-    
+
     [SerializeField]
     private SpriteRenderer rightArmRenderer;
     private Transform _rightArmTransform;
@@ -22,17 +22,19 @@ public class Arms : MonoBehaviour
 
     [SerializeField, Min(0f)]
     private float pushSpeed;
-    
-    
+
+    bool PushLeft, PushRight;
+
+
     //Unity Functions
     //====================================================================================================================//
-    
+
     // Start is called before the first frame update
     private void Start()
     {
         _leftArmTransform = leftArmRenderer.transform;
         _leftArmStartPosition = _leftArmTransform.localPosition;
-        
+
         _rightArmTransform = rightArmRenderer.transform;
         _rightArmStartPosition = _rightArmTransform.localPosition;
 
@@ -47,7 +49,7 @@ public class Arms : MonoBehaviour
             ? Mathf.Clamp01(_t + Time.deltaTime * pushSpeed)
             : Mathf.Clamp01(_t - Time.deltaTime * pushSpeed);
 
-        if(_isPushing)
+        if (_isPushing)
             SetDistance(Mathf.Lerp(_currentDistance, distanceRange, _t));
         else
             SetDistance(Mathf.Lerp(0f, _currentDistance, _t));
@@ -55,12 +57,16 @@ public class Arms : MonoBehaviour
 
     //====================================================================================================================//
 
-    public void SetPush(bool isPushing, bool instant)
+    public void SetPush(bool instant, bool IsLeft = false, bool IsRight = false)
     {
-        _isPushing = isPushing;
-        
+        _isPushing = IsLeft || IsRight;
+
         if (instant)
-            _t = isPushing ? 1f : 0f;
+            _t = IsLeft || IsRight ? 1f : 0f;
+
+        PushLeft = IsLeft;
+
+        PushRight = IsRight;
     }
     public void SetPushT(float t)
     {
@@ -70,8 +76,8 @@ public class Arms : MonoBehaviour
 
     private void SetDistance(float distance)
     {
-        _rightArmTransform.localPosition = _rightArmStartPosition + Vector3.forward * distance;
-        _leftArmTransform.localPosition = _leftArmStartPosition + Vector3.forward * distance;
+        _rightArmTransform.localPosition = _rightArmStartPosition + Vector3.forward * distance * (PushRight ? 1f : 0f);
+        _leftArmTransform.localPosition = _leftArmStartPosition + Vector3.forward * distance * (PushLeft ? 1f : 0f);
 
         _currentDistance = distance;
     }

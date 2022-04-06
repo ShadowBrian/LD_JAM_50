@@ -29,11 +29,11 @@ public class VolcanoFinalAnimation : MonoBehaviour
     }
 
     //====================================================================================================================//
-    
+
     public void StartAnimation()
     {
         skyboxMaterial.SetFloat(AtmosphereThickness, 5f);
-        StartCoroutine(PlayAnimationCoroutine());
+        //StartCoroutine(PlayAnimationCoroutine());
     }
 
     private IEnumerator PlayAnimationCoroutine()
@@ -55,9 +55,9 @@ public class VolcanoFinalAnimation : MonoBehaviour
             {
                 _playingLavaParticles = true;
                 CameraShake.Shake(0f, 0f);
-                
+
                 yield return new WaitForSeconds(0.5f);
-                
+
                 CameraShake.Shake(maxShakeAmplitude, 1000f);
                 lavaParticles.Play();
             }
